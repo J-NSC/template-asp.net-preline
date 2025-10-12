@@ -1,0 +1,7 @@
+﻿services:
+  api-doc:
+    image: api-doc
+    build:
+      context: .
+      dockerfile: Dockerfile
+

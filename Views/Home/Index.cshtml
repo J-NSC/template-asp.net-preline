@@ -1,0 +1,29 @@
+﻿<div>
+    <ui-button data-hs-overlay="#confirm-user-deletion" label="Teste" />
+</div>
+
+
+
+<ui-modal id="confirm-user-deletion" focusable="true" show="false">
+    <ui-modal-title>
+        Are you sure you want to delete your account?
+    </ui-modal-title>
+
+    <ui-modal-body>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            Are you sure you want to delete your account?
+        </h2>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Once your account is deleted, all of its resources and data will be permanently deleted...
+        </p>
+
+        <div class="mt-6">
+            <!-- seus inputs -->
+        </div>
+    </ui-modal-body>
+
+    <ui-modal-footer>
+        <ui-button color="light" data-hs-overlay="#confirm-user-deletion" label="Cancel" class="ms-0" />
+        <ui-button color="danger" data-hs-overlay="#confirm-user-deletion" label="Delete Account" class="ms-3" />
+    </ui-modal-footer>
+</ui-modal>
