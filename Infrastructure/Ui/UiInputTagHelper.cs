@@ -35,15 +35,12 @@ public sealed class UiInputTagHelper : TagHelper
         var fieldId   = Id   ?? Name ?? "";
         var errorMessage = "";
 
-        // tenta achar erro por camelCase e PascalCase
         if (ViewContext?.ViewData?.ModelState is { } ms && !string.IsNullOrEmpty(fieldName))
         {
-            // ex.: title
             if (ms.TryGetValue(fieldName, out var entry) && entry.Errors.Count > 0)
                 errorMessage = entry.Errors[0].ErrorMessage;
             else
             {
-                // ex.: Title
                 var pascal = char.ToUpperInvariant(fieldName[0]) + fieldName.Substring(1);
                 if (ms.TryGetValue(pascal, out var entry2) && entry2.Errors.Count > 0)
                     errorMessage = entry2.Errors[0].ErrorMessage;
