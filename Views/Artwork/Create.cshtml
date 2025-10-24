@@ -1,0 +1,341 @@
+@model api_doc.Models.Artwork.ArtworkCreateViewModel
+@Html.ValidationSummary(excludePropertyErrors: true, message: null, htmlAttributes: new { @class = "mb-4 text-red-600 dark:text-rose-400 text-sm" })
+
+@section PageIcon { <ui-icon name="artwork" class="size-6" /> }
+
+<form asp-action="Store" asp-controller="Artwork" method="post" enctype="multipart/form-data" class="space-y-6">
+
+  @Html.AntiForgeryToken()
+
+  <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6">
+    <h2 class="text-base font-semibold mb-4">Dados básicos</h2>
+
+    <div class="grid grid-cols-4 gap-4">
+      <div >
+        <ui-input label="Título" name="title" id="titulo"  requerid/>
+      </div>
+
+      <div>
+        <ui-input label="Data de criação" type="date" name="creationDate" id="creation_date" />
+      </div>
+
+      <div>
+        <ui-input label="Preço" name="price" id="price" />
+      </div>
+
+      <div>
+        <ui-input label="Localização" name="location" id="location" />
+      </div>
+
+      <div>
+        <ui-input label="Altura" name="weight" id="weight" />
+      </div>
+
+      <div>
+        <ui-input label="Comprimento" name="dimensions" id="dimension" />
+      </div>
+
+      <div>
+        <ui-input label="Quantidade" name="stock" id="stock" />
+      </div>
+
+    </div>
+    
+    <label for="description" class="block text-sm font-medium mb-2 dark:text-white">Descrição</label>
+    <textarea id="description" name="description" rows="4"
+                  class="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm
+                         focus:border-blue-500 focus:ring-blue-500 focus:outline-none
+                         dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                  placeholder="Descreva a obra"></textarea>
+  </section>
+
+  <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6">
+    <h2 class="text-base font-semibold mb-4">Classificações</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div>
+        <ui-select label="Materiais" name="materialId">
+          <option selected value="">Selecione o material</option>
+          @foreach (var m in Model.Materials)
+          { <option value="@m.Id">@m.Name</option> }
+        </ui-select>
+      </div>
+      
+      <div>
+        <ui-multiselect
+          label="Técnicas"
+          id="techniques"
+          name="techniqueIds"
+          placeholder="Selecione técnicas"
+          items="@(Model.Techniques.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }))">
+        </ui-multiselect>
+      </div>
+
+      <div>
+        <ui-select label="Tipo de Arte" name="artTypeId">
+          <option selected value="">Selecione o tipo de arte</option>
+          @foreach (var a in Model.ArtTypes)
+          { <option value="@a.Id">@a.Type</option> }
+        </ui-select>
+      </div>
+
+      <div>
+        <ui-select label="Status" name="statusId">
+          <option selected value="">Selecione o status</option>
+          @foreach (var s in Model.Statuses)
+          { <option value="@s.Id">@s.Status</option> }
+        </ui-select>
+      </div>
+
+      <div>
+        <ui-select label="Orientação" name="orientationType">
+          <option selected value="">Selecione a orientação</option>
+          @foreach (var o in Model.OrientationTypes)
+          { <option value="@o.Value">@o.Display</option> }
+        </ui-select>
+      </div>
+    </div>
+  </section>
+  
+  <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6">
+    <h2 class="text-base font-semibold mb-4">Acessibilidade</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
+      <div>
+        <ui-select label="Recurso" name="resourceTypeId">
+          <option selected value="">Selecione o tipo do recurso</option>
+          @foreach (var o in Model.ResourceType)
+          { <option value="@o.Id">@o.Name</option> }
+        </ui-select>
+      </div>
+      
+      <div>
+        <ui-select label="Linguagem" name="languageId">
+          <option selected value="">Selecione a linguagem</option>
+          @foreach (var o in Model.Languages)
+          { <option value="@o.Id">@o.Name</option> }
+        </ui-select>
+      </div>
+    </div>
+    
+    <label for="description_accessibility" class="block text-sm font-medium mb-2 dark:text-white">Descrição</label>
+    <textarea id="description_accessibility" name="accessibilityDescription" rows="4"
+                  class="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm
+                         focus:border-blue-500 focus:ring-blue-500 focus:outline-none
+                         dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                  placeholder="Texto..."></textarea>
+  </section>
+  
+  <!-- CARD: Uploads -->
+  <section
+    x-data="fileUploader()"
+    class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6">
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-semibold">Uploads</h2>
+      <button type="button"
+              class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs border border-gray-300 hover:bg-gray-100
+                     dark:border-neutral-700 dark:hover:bg-neutral-800"
+              @@click="resetAll()">
+        Limpar arquivos
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Bloco: Modelo 3D -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium dark:text-white">Modelo 3D</label>
+
+        <label class="flex items-center justify-between gap-3 w-full rounded-lg border border-dashed p-3 cursor-pointer
+                      border-gray-300 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+          <div class="min-w-0">
+            <p class="truncate text-sm text-gray-600 dark:text-neutral-300"
+               x-text="model3d.name || 'Selecione um .glb / .gltf / .fbx / .obj'"></p>
+            <p class="text-xs text-gray-400 dark:text-neutral-500"
+               x-text="model3d.sizeLabel || 'Máx. 200 MB'"></p>
+          </div>
+
+          <input type="file"
+                 id="model_3d"
+                 name="object3DFile"
+                 class="hidden"
+                 accept=".glb,.gltf,.fbx,.obj,.zip"
+                 @@change="loadFile('model3d', $event)" />
+
+          <!-- Status -->
+          <template x-if="model3d.state==='idle'">
+            <span class="inline-flex items-center justify-center rounded-lg px-2.5 py-1.5 text-xs bg-gray-100 text-gray-600
+                          dark:bg-neutral-800 dark:text-neutral-300">Selecionar</span>
+          </template>
+          <template x-if="model3d.state==='loading'">
+            <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-amber-100 text-amber-700
+                          dark:bg-amber-900/30 dark:text-amber-300">
+              <svg class="animate-spin size-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+              Carregando…
+            </span>
+          </template>
+          <template x-if="model3d.state==='ready'">
+            <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-emerald-100 text-emerald-700
+                          dark:bg-emerald-900/30 dark:text-emerald-300">
+              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Pronto
+            </span>
+          </template>
+          <template x-if="model3d.state==='error'">
+            <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-rose-100 text-rose-700
+                          dark:bg-rose-900/30 dark:text-rose-300">
+              Erro
+            </span>
+          </template>
+        </label>
+
+        <!-- Barra de progresso -->
+        <div class="h-1 rounded bg-gray-200 dark:bg-neutral-800 overflow-hidden"
+             x-show="model3d.state==='loading'">
+          <div class="h-full bg-blue-600 transition-all" :style="`width:${model3d.progress}%`"></div>
+        </div>
+
+        <!-- Ações do arquivo -->
+        <div class="flex items-center justify-between text-xs"
+             x-show="model3d.state==='ready'">
+          <span class="text-gray-500 dark:text-neutral-400" x-text="model3d.mime"></span>
+          <button type="button" class="text-rose-600 hover:underline" @@click="clearFile('model3d')">remover</button>
+        </div>
+      </div>
+
+      <!-- Bloco: Imagem -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium dark:text-white">Imagem</label>
+
+        <label class="flex items-center justify-between gap-3 w-full rounded-lg border border-dashed p-3 cursor-pointer
+                      border-gray-300 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+          <div class="min-w-0">
+            <p class="truncate text-sm text-gray-600 dark:text-neutral-300"
+               x-text="image.name || 'Selecione uma imagem .png / .jpg / .jpeg / .webp'"></p>
+            <p class="text-xs text-gray-400 dark:text-neutral-500"
+               x-text="image.sizeLabel || 'Máx. 10 MB'"></p>
+          </div>
+
+          <input type="file"
+                 id="image"
+                 name="imageFile"
+                 class="hidden"
+                 accept=".png,.jpg,.jpeg,.webp"
+                 @@change="loadFile('image', $event)" />
+
+          <!-- Status -->
+          <template x-if="image.state==='idle'">
+            <span class="inline-flex items-center justify-center rounded-lg px-2.5 py-1.5 text-xs bg-gray-100 text-gray-600
+                          dark:bg-neutral-800 dark:text-neutral-300">Selecionar</span>
+          </template>
+          <template x-if="image.state==='loading'">
+            <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-amber-100 text-amber-700
+                          dark:bg-amber-900/30 dark:text-amber-300">
+              <svg class="animate-spin size-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+              Carregando…
+            </span>
+          </template>
+          <template x-if="image.state==='ready'">
+            <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-emerald-100 text-emerald-700
+                          dark:bg-emerald-900/30 dark:text-emerald-300">
+              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Pronto
+            </span>
+          </template>
+          <template x-if="image.state==='error'">
+            <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-rose-100 text-rose-700
+                          dark:bg-rose-900/30 dark:text-rose-300">
+              Erro
+            </span>
+          </template>
+        </label>
+
+        <div class="h-1 rounded bg-gray-200 dark:bg-neutral-800 overflow-hidden"
+             x-show="image.state==='loading'">
+          <div class="h-full bg-blue-600 transition-all" :style="`width:${image.progress}%`"></div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs"
+             x-show="image.state==='ready'">
+          <span class="text-gray-500 dark:text-neutral-400" x-text="image.mime"></span>
+          <button type="button" class="text-rose-600 hover:underline" @@click="clearFile('image')">remover</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+  <div class="flex items-center gap-3 justify-end">
+    <a href="@Url.Action("Index","Artwork")"
+       class="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-100
+              dark:border-neutral-700 dark:hover:bg-neutral-800">
+      Cancelar
+    </a>
+
+    <button type="submit"
+            class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+      Salvar
+    </button>
+  </div>
+</form>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('fileUploader', () => ({
+      // estados por campo
+      model3d: { state:'idle', progress:0, name:'', sizeLabel:'', mime:'' },
+      image  : { state:'idle', progress:0, name:'', sizeLabel:'', mime:'' },
+
+      resetAll(){
+        this.clearFile('model3d');
+        this.clearFile('image');
+      },
+
+      clearFile(which){
+        const el = document.getElementById(which === 'model3d' ? 'model_3d' : 'image');
+        if (el) el.value = '';
+        const st = this[which];
+        st.state = 'idle'; st.progress = 0; st.name = ''; st.sizeLabel=''; st.mime='';
+      },
+
+      loadFile(which, e){
+        const file = e.target.files?.[0];
+        const st = this[which];
+        if (!file){ this.clearFile(which); return; }
+
+        // validações simples
+        const max = which==='model3d' ? 200 * 1024 * 1024 : 10 * 1024 * 1024; // 200MB/10MB
+        if (file.size > max){
+          st.state = 'error'; st.name = file.name; st.sizeLabel = this.fmtSize(file.size);
+          alert(`Arquivo muito grande (${this.fmtSize(file.size)}). Limite: ${this.fmtSize(max)}.`);
+          return;
+        }
+
+        st.state = 'loading';
+        st.progress = 10;
+        st.name = file.name;
+        st.sizeLabel = this.fmtSize(file.size);
+        st.mime = file.type || 'desconhecido';
+
+        const reader = new FileReader();
+        reader.onprogress = (ev) => {
+          if (ev.lengthComputable){
+            st.progress = Math.max(15, Math.floor((ev.loaded/ev.total)*100));
+          } else {
+            st.progress = Math.min(95, st.progress + 5);
+          }
+        };
+        reader.onload = () => { st.progress = 100; st.state = 'ready'; };
+        reader.onerror = () => { st.state = 'error'; };
+        reader.readAsArrayBuffer(file);
+      },
+
+      fmtSize(bytes){
+        const units = ['B','KB','MB','GB']; let i=0; let n=bytes;
+        while(n>=1024 && i<units.length-1){ n/=1024; i++; }
+        return `${n.toFixed(n<10&&i>0?1:0)} ${units[i]}`;
+      }
+    }));
+  });
+</script>

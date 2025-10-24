@@ -16,6 +16,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@preline/select": "^3.2.3",
     "@preline/theme-switch": "^3.2.3",
     "preline": "^3.2.3"
   }

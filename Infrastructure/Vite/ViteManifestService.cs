@@ -7,7 +7,6 @@ public sealed class ViteManifestService : IViteManifestService
     readonly IWebHostEnvironment _env;
     readonly ViteManifestOptions _opts;
 
-    // ⬇️ Removido IWebHost do construtor
     public ViteManifestService(IWebHostEnvironment env, ViteManifestOptions opts)
     {
         _env = env;

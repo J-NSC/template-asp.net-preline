@@ -9,6 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.28" />
+      <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+      <PackageReference Include="System.Net.Http.Json" Version="9.0.9" />
       <PackageReference Include="Vite.AspNetCore" Version="2.4.1" />
     </ItemGroup>
 

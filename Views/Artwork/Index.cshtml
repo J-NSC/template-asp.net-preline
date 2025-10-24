@@ -1,0 +1,78 @@
+@model List<api_doc.Models.Artwork.ArtworkListItemDto>
+@using System.Globalization
+
+@section PageIcon { <ui-icon name="artwork" class="size-6" /> }
+
+@section HeaderButtons
+{
+    <a asp-controller="Artwork" asp-action="Create"
+       class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+        Cadastrar obra
+    </a>
+}
+
+@{
+    var baseUrl = (string)(ViewBag.ApiBase ?? "");
+    var ci = CultureInfo.GetCultureInfo("pt-BR");
+    var host = (string)(ViewBag.ApiHost ?? "");
+}
+
+@if (Model is null || Model.Count == 0)
+{
+    <div class="text-sm text-gray-500 dark:text-neutral-400">Nenhuma obra encontrada.</div>
+}
+else
+{
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @foreach (var item in Model)
+        {
+            var imgUrl = !string.IsNullOrWhiteSpace(item.ImageObjectPath)
+                ? $"{host}{item.ImageObjectPath}"
+                : Url.Content("~/images/placeholder-art.jpg");
+
+            <div class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                <img class="w-full h-44 object-cover rounded-t-xl"
+                     src="@imgUrl"
+                     alt="@item.Title"
+                     onerror="this.onerror=null; this.src='@Url.Content("~/images/placeholder-art.jpg")';" />
+
+                <div class="p-4 md:p-5">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white truncate">
+                        @(!string.IsNullOrWhiteSpace(item.Title) ? item.Title : "Sem título")
+                    </h3>
+
+                    <p class="mt-1 text-gray-500 dark:text-neutral-400 line-clamp-2">
+                        @(!string.IsNullOrWhiteSpace(item.Description) ? item.Description : "Sem descrição.")
+                    </p>
+
+                    <div class="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-neutral-400">
+                        <span><span class="font-medium">Tipo:</span> @(item.ArtType ?? "—")</span>
+                        <span><span class="font-medium">Material:</span> @(item.Material ?? "—")</span>
+                        <span><span class="font-medium">Local:</span> @(item.Location ?? "—")</span>
+                    </div>
+
+                    <div class="mt-3 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-800 dark:text-neutral-100">
+                            @((item.Price ?? 0).ToString("C", ci))
+                        </span>
+
+                        <div class="flex gap-2">
+                            <a asp-action="Details" asp-route-id="@item.Id"
+                               class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                Ver
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@item.Id"
+                               class="px-2.5 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                                Editar
+                            </a>
+                        </div>
+                    </div>
+
+                    <p class="mt-4 text-[11px] text-gray-500 dark:text-neutral-500">
+                        Atualizado @(item.UpdatedAt ?? item.CreatedAt ?? DateTime.Now).ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+}

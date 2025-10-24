@@ -50,6 +50,18 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Microsoft.OpenApi.Readers": {
+              "target": "Package",
+              "version": "[1.6.28, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "System.Net.Http.Json": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
             "Vite.AspNetCore": {
               "target": "Package",
               "version": "[2.4.1, )"

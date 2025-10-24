@@ -1,4 +1,4 @@
-namespace api_doc.Infrastructure.Ui;
+namespace api_doc.Infrastructure.Ui.Modal;
 
 public class ModalContext
 {

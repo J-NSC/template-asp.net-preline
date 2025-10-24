@@ -1,0 +1,22 @@
+@{
+    Layout = null;
+    var title = (string?)ViewData["Title"] ?? "Login";
+}
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title — Minha App</title>
+    <vite entry="src/main.ts" />
+    <style>html, body { height: 100%; }</style>
+</head>
+<body class="h-full bg-gray-100 dark:bg-neutral-900 text-gray-900 dark:text-neutral-100">
+<main class="min-h-full grid place-items-center p-6">
+    <div class="w-full max-w-sm">
+        @RenderBody()
+    </div>
+</main>
+@RenderSection("Scripts", required: false)
+</body>
+</html>

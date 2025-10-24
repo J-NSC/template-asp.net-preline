@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace api_doc.Infrastructure.Ui;
+namespace api_doc.Infrastructure.Ui.Modal;
 
 [HtmlTargetElement("ui-modal", TagStructure = TagStructure.NormalOrSelfClosing)]
 public sealed class UiModalTagHelper : TagHelper

@@ -1,8 +1,15 @@
-﻿<div>
-    <ui-button data-hs-overlay="#confirm-user-deletion" label="Teste" />
+﻿@section PageIcon {
+    <ui-icon name="home" class="size-6 text-gray-700 dark:text-neutral-300" />
+}
+
+@section HeaderButtons {
+    <ui-button color="primary" label="Novo usuário" />
+    <ui-button color="light" label="Exportar" class="ms-2" />
+}
+
+<div>
+    <ui-button data-hs-overlay="#confirm-user-deletion" label="Teste2" />
 </div>
-
-
 
 <ui-modal id="confirm-user-deletion" focusable="true" show="false">
     <ui-modal-title>

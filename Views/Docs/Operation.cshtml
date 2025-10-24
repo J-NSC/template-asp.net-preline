@@ -1,0 +1,114 @@
+@using Microsoft.OpenApi.Models
+@model (OpenApiDocument doc, dynamic match, string tag)
+
+<div class="grid lg:grid-cols-3 gap-6">
+  <section class="lg:col-span-2 space-y-4">
+    <div class="px-4 py-3 rounded-lg border bg-white dark:bg-neutral-900 dark:border-neutral-800">
+      <div class="flex items-center gap-2 mb-2">
+        @{
+          string m = ((Microsoft.OpenApi.Models.OperationType)Model.match.Method).ToString().ToUpperInvariant();
+          string badge = m switch { "GET"=>"bg-emerald-600","POST"=>"bg-blue-600","PUT"=>"bg-amber-600","PATCH"=>"bg-violet-600","DELETE"=>"bg-rose-600", _=>"bg-gray-600" };
+        }
+        <span class="text-xs text-white px-2 py-0.5 rounded @badge">@m</span>
+        <span class="font-mono">@Model.match.Path</span>
+      </div>
+      <p class="text-sm opacity-80">@Model.match.Op.Description</p>
+    </div>
+
+    @if(Model.match.Op.Parameters?.Count > 0)
+    {
+      <div class="px-4 py-3 rounded-lg border bg-white dark:bg-neutral-900 dark:border-neutral-800">
+        <h3 class="font-semibold mb-2">Parâmetros</h3>
+        <table class="w-full text-sm">
+          <thead><tr><th class="text-left py-2">Nome</th><th>In</th><th>Tipo</th><th>Obrigatório</th></tr></thead>
+          <tbody>
+            @foreach(var p in Model.match.Op.Parameters)
+            {
+              <tr class="border-t dark:border-neutral-800">
+                <td class="py-2">@p.Name</td>
+                <td class="text-center">@p.In</td>
+                <td class="text-center">@p.Schema?.Type</td>
+                <td class="text-center">@p.Required</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <div class="px-4 py-3 rounded-lg border bg-white dark:bg-neutral-900 dark:border-neutral-800">
+      <h3 class="font-semibold mb-2">Responses</h3>
+      <ul class="space-y-2">
+        @foreach (var kv in Model.match.Op.Responses)
+        {
+          <li class="border rounded-lg p-3 dark:border-neutral-800">
+            <div class="font-mono text-sm mb-1">HTTP @kv.Key</div>
+            <div class="text-sm opacity-80">Certo</div>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Try it -->
+  <aside class="lg:col-span-1 px-4 py-3 rounded-lg border bg-white dark:bg-neutral-900 dark:border-neutral-800">
+    <h3 class="font-semibold mb-3">Try it</h3>
+    <label class="block text-sm mb-1">Bearer Token (opcional)</label>
+    <input id="try-token" type="text" class="w-full rounded border px-2 py-1 text-sm bg-transparent dark:border-neutral-700" placeholder="eyJ...">
+
+    <div class="mt-3">
+      <label class="block text-sm mb-1">Query string (JSON)</label>
+      <textarea id="try-query" rows="3" class="w-full rounded border px-2 py-1 text-sm bg-transparent dark:border-neutral-700" placeholder='{ "page": 1 }'></textarea>
+    </div>
+
+    <div class="mt-3">
+      <label class="block text-sm mb-1">Body (JSON)</label>
+      <textarea id="try-body" rows="6" class="w-full rounded border px-2 py-1 text-sm bg-transparent dark:border-neutral-700"></textarea>
+    </div>
+
+    
+    <ui-button id="try-send" label="Enviar"/>
+
+    <pre id="try-result" class="mt-3 text-xs p-3 rounded bg-gray-100 dark:bg-neutral-800 overflow-auto max-h-80"></pre>
+  </aside>
+</div>
+
+@section Scripts {
+  <script>
+  document.getElementById('try-send')?.addEventListener('click', async () => {
+    const token = document.getElementById('try-token').value.trim();
+    const q = document.getElementById('try-query').value.trim();
+    const bodyRaw = document.getElementById('try-body').value.trim();
+
+    const base = 'https://localhost:7060'; 
+    const path = '@Model.match.Path'; 
+    const method = '@Model.match.Method'.toUpperCase();
+    
+    console.log(base)
+    
+    let url = base + path;
+
+    if (q) {
+      try {
+        const obj = JSON.parse(q);
+        const usp = new URLSearchParams(obj).toString();
+        if (usp) url += (url.includes('?') ? '&' : '?') + usp;
+      } catch { alert('Query inválida (JSON)'); return; }
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    let body = undefined;
+    if (bodyRaw && method !== 'GET') {
+      try { body = JSON.stringify(JSON.parse(bodyRaw)); }
+      catch { alert('Body inválido (JSON)'); return; }
+    }
+
+    const res = await fetch(url, { method, headers, body });
+    const text = await res.text();
+    document.getElementById('try-result').textContent =
+      `Status: ${res.status}\n` + (text || '<sem corpo>');
+  });
+  </script>
+}

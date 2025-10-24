@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace api_doc.Infrastructure.Ui;
+namespace api_doc.Infrastructure.Ui.Modal;
 
 [HtmlTargetElement("ui-modal-body", ParentTag = "ui-modal")]
 public sealed class UiModalBodyTagHelper : TagHelper

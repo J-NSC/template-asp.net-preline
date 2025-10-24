@@ -1,0 +1,65 @@
+@{
+  Layout = "_Layout";
+}
+
+@using Microsoft.OpenApi.Models
+@using api_doc.Models.Docs
+@model (OpenApiDocument doc, Dictionary<string, List<DocOp>> byTag)
+
+@section PageIcon {
+  <ui-icon name="home" class="size-6 text-gray-700 dark:text-neutral-300" />
+}
+
+@section HeaderButtons {
+  <ui-button color="primary" label="Novo usuário" />
+  <ui-button color="light" label="Exportar" class="ms-2" />
+}
+
+<div class="grid lg:grid-cols-4 gap-6">
+  <aside class="lg:col-span-1 space-y-2">
+    @foreach (var g in Model.byTag)
+    {
+      <a href="#@g.Key" class="block px-3 py-2 rounded-lg border text-sm bg-white dark:bg-neutral-900 dark:border-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-800">
+        @g.Key
+        <span class="ms-2 text-xs opacity-60">@g.Value.Count</span>
+      </a>
+    }
+  </aside>
+
+  <section class="lg:col-span-3 space-y-10">
+    @foreach (var g in Model.byTag)
+    {
+      <div id="@g.Key">
+        <h2 class="text-xl font-semibold mb-2">@g.Key</h2>
+        <div class="space-y-2">
+          @foreach (var x in g.Value)
+          {
+            var method = x.OperationType.ToString().ToUpperInvariant();
+            var badge = method switch {
+              "GET" => "bg-emerald-600", "POST" => "bg-blue-600",
+              "PUT" => "bg-amber-600", "PATCH" => "bg-violet-600",
+              "DELETE" => "bg-rose-600", _ => "bg-gray-600"
+            };
+
+            // AGORA há sempre um ID válido
+            <span class="text-xs text-gray-500">
+              @Url.RouteUrl("docs-operation", new { tag = g.Key, operationId = x.RouteId })
+            </span>
+
+            <a class="flex items-center justify-between px-3 py-2 rounded-lg border bg-white dark:bg-neutral-900 dark:border-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-800"
+               asp-route="docs-operation"
+               asp-route-tag="@g.Key"
+               asp-route-operationId="@x.RouteId">
+              <span class="inline-flex items-center gap-2">
+                <span class="text-xs text-white px-2 py-0.5 rounded @badge">@method</span>
+                <span class="font-mono text-sm">@x.Path</span>
+              </span>
+              <span class="text-sm opacity-70">@x.Operation.Summary ?? x.Operation.OperationId ?? x.RouteId</span>
+            </a>
+          }
+
+        </div>
+      </div>
+    }
+  </section>
+</div>
