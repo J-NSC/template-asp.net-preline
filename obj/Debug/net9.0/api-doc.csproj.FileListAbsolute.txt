@@ -324,4 +324,6 @@ C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\api-doc.genruntimeconfig.c
 C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\ref\api-doc.dll
 C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\compressed\gf6fh7wbsi-ch8ar2zadf.gz
 C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\compressed\eusu664c5u-ls4q2buar6.gz
-C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\compressed\z25x1x1kxf-o4mv98sqaj.gz
+C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\compressed\1ku5r7wjj7-tx83jgl2wk.gz
+C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\compressed\fn6vfiirld-q18wviy3rs.gz
+C:\Users\jncos\RiderProjects\api-doc\obj\Debug\net9.0\compressed\z25x1x1kxf-64c5ktdnlk.gz

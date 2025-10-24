@@ -1,18 +1,15 @@
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text;
-
-namespace api_doc.Infrastructure.Ui;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 [HtmlTargetElement("ui-input", TagStructure = TagStructure.NormalOrSelfClosing)]
 public sealed class UiInputTagHelper : TagHelper
 {
-    private readonly IViewDataAccessor _viewDataAccessor;
-
-    public UiInputTagHelper(IViewDataAccessor viewDataAccessor)
-    {
-        _viewDataAccessor = viewDataAccessor;
-    }
+    // injeta ViewContext automaticamente
+    [HtmlAttributeNotBound]
+    [ViewContext]
+    public ViewContext? ViewContext { get; set; }
 
     [HtmlAttributeName("label")] public string? Label { get; set; }
     [HtmlAttributeName("type")] public string Type { get; set; } = "text";
@@ -35,21 +32,26 @@ public sealed class UiInputTagHelper : TagHelper
         var sb = new StringBuilder();
 
         var fieldName = Name ?? Id ?? "";
-        var fieldId = Id ?? Name ?? "";
-        var errorMessage = string.Empty;
+        var fieldId   = Id   ?? Name ?? "";
+        var errorMessage = "";
 
-        var viewData = _viewDataAccessor.ViewData;
-        if (viewData != null && !string.IsNullOrEmpty(fieldName) && viewData.ModelState.TryGetValue(fieldName, out var entry))
+        // tenta achar erro por camelCase e PascalCase
+        if (ViewContext?.ViewData?.ModelState is { } ms && !string.IsNullOrEmpty(fieldName))
         {
-            var err = entry.Errors.FirstOrDefault();
-            if (err != null)
-                errorMessage = err.ErrorMessage;
+            // ex.: title
+            if (ms.TryGetValue(fieldName, out var entry) && entry.Errors.Count > 0)
+                errorMessage = entry.Errors[0].ErrorMessage;
+            else
+            {
+                // ex.: Title
+                var pascal = char.ToUpperInvariant(fieldName[0]) + fieldName.Substring(1);
+                if (ms.TryGetValue(pascal, out var entry2) && entry2.Errors.Count > 0)
+                    errorMessage = entry2.Errors[0].ErrorMessage;
+            }
         }
 
         if (!string.IsNullOrEmpty(Label))
-        {
             sb.AppendLine($"<label for=\"{fieldId}\" class=\"block text-sm font-medium mb-2 dark:text-white\">{Label}</label>");
-        }
 
         var baseInputClass =
             "py-2.5 sm:py-3 px-4 block w-full rounded-lg border bg-white text-gray-900 " +
@@ -57,19 +59,14 @@ public sealed class UiInputTagHelper : TagHelper
             "disabled:opacity-50 disabled:pointer-events-none " +
             "dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-600";
 
-        if (!string.IsNullOrEmpty(errorMessage))
-            baseInputClass += " border-red-500 dark:border-rose-500";
-        else
-            baseInputClass += " border-gray-200";
+        baseInputClass += string.IsNullOrEmpty(errorMessage) ? " border-gray-200" : " border-red-500 dark:border-rose-500";
+        if (!string.IsNullOrWhiteSpace(ExtraInputClass)) baseInputClass += " " + ExtraInputClass;
 
-        if (!string.IsNullOrWhiteSpace(ExtraInputClass))
-            baseInputClass += " " + ExtraInputClass;
-        
         sb.Append("<input");
         sb.Append($" type=\"{Type}\"");
         if (!string.IsNullOrEmpty(fieldId)) sb.Append($" id=\"{fieldId}\"");
-        if (!string.IsNullOrEmpty(Name)) sb.Append($" name=\"{Name}\"");
-        if (!string.IsNullOrEmpty(Value)) sb.Append($" value=\"{Value}\"");
+        if (!string.IsNullOrEmpty(Name))    sb.Append($" name=\"{Name}\"");
+        if (!string.IsNullOrEmpty(Value))   sb.Append($" value=\"{Value}\"");
         if (!string.IsNullOrEmpty(Placeholder)) sb.Append($" placeholder=\"{Placeholder}\"");
         if (!string.IsNullOrEmpty(Autocomplete)) sb.Append($" autocomplete=\"{Autocomplete}\"");
         if (Disabled) sb.Append(" disabled");
@@ -78,9 +75,7 @@ public sealed class UiInputTagHelper : TagHelper
         sb.Append(" />");
 
         if (!string.IsNullOrEmpty(errorMessage))
-        {
             sb.AppendLine($"<p class=\"mt-1 text-sm text-red-600 dark:text-rose-400\">{errorMessage}</p>");
-        }
 
         output.Content.SetHtmlContent(sb.ToString());
     }

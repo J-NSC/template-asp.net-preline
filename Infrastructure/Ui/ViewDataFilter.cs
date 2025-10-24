@@ -21,8 +21,5 @@ public sealed class ViewDataFilter : IActionFilter
         }
     }
 
-    public void OnActionExecuted(ActionExecutedContext context)
-    {
-        // nada a fazer depois
-    }
+    public void OnActionExecuted(ActionExecutedContext context) { }
 }
